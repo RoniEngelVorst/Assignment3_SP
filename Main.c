@@ -3,45 +3,54 @@
 #include <string.h>
 
 // Define the StrList struct here
-struct _StrList {
+typedef struct _node {
     char* _data;
-    struct _StrList* _next;
+    struct _node * _next;
+} Node;
+
+/*
+ * StrList represents a StrList data structure.
+ */
+struct _StrList{
+    struct _node* _head;
     size_t _size;
 };
+typedef struct _StrList StrList;
 
 #include "StrList.h"
 
-// int find_string_len(char str[]){
-//     int length = 0;
+int find_string_len(const char str[]){
+    int length = 0;
 
-//     // Iterate through each character of the string until we reach the null terminator
-//     while (str[length] != '\0' && str[length] != '\n') {
-//         length++;
-//     }
-//     return length;
-// }
+    // Iterate through each character of the string until we reach the null terminator
+    while (str[length] != '\0' && str[length] != '\n') {
+        length++;
+    }
+    return length;
+}
 
-// char* getRealString(const char str[]){
-//     int length = find_string_len(str);
-//     char* realString = (char*)malloc((length + 1) * sizeof(char));
-//     if (realString == NULL) {
-//         return NULL; // Handle memory allocation failure
-//     }
+char* getRealString(const char str[]){
+    int length = find_string_len(str);
+    char* realString = (char*)malloc((length + 1) * sizeof(char));
+    if (realString == NULL) {
+        return NULL; // Handle memory allocation failure
+    }
 
-//     // Copy the characters of the real string
-//     strncpy(realString, str, length);
-//     realString[length] = '\0'; // Null-terminate the string
+    // Copy the characters of the real string
+    strncpy(realString, str, length);
+    realString[length] = '\0'; // Null-terminate the string
 
-//     return realString;
-// }
+    return realString;
+}
 
-int find_string_len(const char str[]);
-char* getRealString(const char str[]);
 
 int main(){
     int input = -1;
-    StrList* List = StrList_alloc("", NULL);
-    // scanf("%d", &input);
+    StrList* List = StrList_alloc();
+    if (List == NULL) {
+        printf("Memory allocation failed.\n");
+        return 1;
+    }
     while(scanf("%d", &input) != EOF){
         if (input == 0) {
         break; // Exit the loop if input is 0
@@ -55,24 +64,23 @@ int main(){
         case 1:{
             int numOfWords = 0;
             scanf("%d", &numOfWords);
-            getchar();
+            getchar(); // Clear the input buffer
 
             char sentence[1000];
-            // fgets(sentence, sizeof(sentence), stdin);
-            scanf("%[^\n]", sentence);
-            getchar();
+            scanf(" %[^\n]", sentence);
+            getchar(); // Clear the input buffer
 
             char* token = strtok(sentence, " ");
-            int i = 0;
-            while (token != NULL && i < numOfWords) {
-                if (strcmp(List->_data, "") == 0) {
-                    strcpy(List->_data, token);
-                }
-                else{
-                    StrList_insertLast(List, strdup(token));
+            while (token != NULL && StrList_size(List) < numOfWords) {
+                char* realWord = getRealString(token);
+                if (realWord != NULL) {
+                    StrList_insertLast(List, realWord);
+                } else {
+                    printf("Memory allocation failed. Exiting...\n");
+                    StrList_free(List); // Free allocated memory before exiting
+                    return 1; // Exit with error code
                 }
                 token = strtok(NULL, " ");
-                i++;
             }
             break;
         }
@@ -147,9 +155,12 @@ int main(){
         }
 
         case 11:{
-            StrList_free(List->_next);
-            free(List->_data);
-            List->_size = 0;
+            StrList_free(List);
+            List = StrList_alloc(); // Reinitialize the list after freeing
+            if (List == NULL) {
+                printf("Memory allocation failed.\n");
+                return 1;
+            }
             break;
         }
 
@@ -160,15 +171,16 @@ int main(){
 
         case 13:{
             if(StrList_isSorted(List) != 0){
-                printf("True\n");
+                printf("true\n");
             }
             else{
-                printf("False\n");
+                printf("false\n");
             }
             break;
         }
                 
         default:
+            printf("Invalid input.\n");
             break;
         }
     }  

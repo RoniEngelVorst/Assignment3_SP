@@ -17,7 +17,7 @@ struct _StrList{
 };
 typedef struct _StrList StrList;
 
-Node* Node_alloc(char* data, Node* next) {
+Node* Node_alloc(const char* data, Node* next) {
 	Node* p = (Node*)malloc(sizeof(Node));
     if (p) {
         p->_data = (char*)malloc(strlen(data) + 1);
@@ -77,7 +77,7 @@ size_t StrList_size(const StrList* StrList){
  * Inserts an element in the end of the StrList.
  */
 void StrList_insertLast(StrList* StrList, const char* data){
-    Node* n = Node_alloc(data, NULL);
+    Node* n = Node_alloc((char*)data, NULL);
     if(n == NULL){
         return;
     }
@@ -107,7 +107,7 @@ void StrList_insertAt(StrList* StrList, const char* data,int index){
         return;
     }
 
-    Node* n = Node_alloc(data, NULL);
+    Node* n = Node_alloc((char*)data, NULL);
     if(n == NULL){
         return;
     }
@@ -141,10 +141,11 @@ char* StrList_firstData(const StrList* StrList){
  */
 void StrList_print(const StrList* StrList){
     Node* temp = StrList->_head;
-    while(temp != NULL){
+    while(temp->_next != NULL){
         printf("%s ", temp->_data);
         temp = temp->_next;
     }
+    printf("%s", temp->_data);
     printf("\n");
 }
 
