@@ -77,25 +77,25 @@ size_t StrList_size(const StrList* StrList){
  * Inserts an element in the end of the StrList.
  */
 void StrList_insertLast(StrList* StrList, const char* data){
-    Node* n = Node_alloc((char*)data, NULL);
-    if(n == NULL){
-        return;
+    if (StrList == NULL) {
+        return; // Check for NULL StrList
     }
-    if(StrList == NULL){
-        return;
+
+    Node* n = Node_alloc(data, NULL);
+    if (n == NULL) {
+        return; // Handle memory allocation failure
     }
-    if(StrList->_head == NULL){
+
+    if (StrList->_head == NULL) {
         StrList->_head = n;
-        StrList->_size = 1;
-    }
-    else{
+    } else {
         Node* temp = StrList->_head;
-        while(temp->_next != NULL){
+        while (temp->_next != NULL) {
             temp = temp->_next;
         }
         temp->_next = n;
-        StrList->_size++;
     }
+    StrList->_size++;
     
 }
 
@@ -140,6 +140,13 @@ char* StrList_firstData(const StrList* StrList){
  * Prints the StrList to the standard output.
  */
 void StrList_print(const StrList* StrList){
+    if(StrList == NULL){
+        return;
+    }
+    if(StrList->_head == NULL){
+        printf("\n");
+        return;
+    }
     Node* temp = StrList->_head;
     while(temp->_next != NULL){
         printf("%s ", temp->_data);
@@ -347,29 +354,39 @@ int compareStrings(const void* a, const void* b) {
  * Sort the given list in lexicographical order 
  */
 void StrList_sort( StrList* StrList){
-    if(StrList == NULL || StrList->_size < 2){
+     if (StrList == NULL || StrList->_size < 2) {
         return;
     }
 
-    char **arr = (char**)malloc(StrList->_size * sizeof(char*));
+    char **arr = (char **)malloc(StrList->_size * sizeof(char *));
     if (arr == NULL) {
         // Handle memory allocation failure
         return;
     }
 
-    Node* temp = StrList->_head;
+    Node *temp = StrList->_head;
     int i = 0;
-    while(temp != NULL && i < StrList->_size){
-        arr[i] = temp->_data;
+    while (temp != NULL && i < StrList->_size) {
+        arr[i] = strdup(temp->_data); // Allocate new memory for each string
+        if (arr[i] == NULL) {
+            // Handle memory allocation failure
+            // Free allocated memory before returning
+            for (int j = 0; j < i; j++) {
+                free(arr[j]);
+            }
+            free(arr);
+            return;
+        }
         temp = temp->_next;
         i++;
     }
-    qsort(arr, StrList->_size, sizeof(char*), compareStrings);
+
+    qsort(arr, StrList->_size, sizeof(char *), compareStrings);
     temp = StrList->_head;
     i = 0;
     while (temp != NULL && i < StrList->_size) {
         free(temp->_data); // Free original memory
-        temp->_data = strdup(arr[i]); // Assign sorted string
+        temp->_data = arr[i]; // Assign sorted string
         temp = temp->_next;
         i++;
     }

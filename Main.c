@@ -89,6 +89,7 @@ int main(){
         case 2:{
             int index = 0;
             scanf("%d", &index);
+            getchar();
             char word[100];
             scanf(" %[^\n]", word);
             getchar();
@@ -103,38 +104,44 @@ int main(){
             break;
         }
 
+        //printing the size of the list
         case 4:{
             printf("%zu", List->_size);
             printf("\n");
             break;
         }
 
+        //printing at a certain index
         case 5:{
             int index = 0;
             scanf("%d", &index);
+            getchar();
             StrList_printAt(List, index);
             break;
         }
 
+        //printing the number of chars in the entire list
         case 6:{
             int len = StrList_printLen(List);
             printf("%d\n", len);
             break;
         }
 
+        //printing how many times a string is showing in the list
         case 7:{
             char word[100];
-            scanf("%[^\n]", word);
-            getchar();
+            scanf("%s", word);
+            getchar();  // Consume the newline character
             char* realWord = getRealString(word);
             printf("%d\n", StrList_count(List, realWord));
             free(realWord);
             break;
         }
 
+        //removing from the list each node with the string
         case 8:{
             char word[100];
-            scanf("%[^\n]", word);
+            scanf("%s", word);
             getchar();
             char* realWord = getRealString(word);
             StrList_remove(List, realWord);
@@ -142,18 +149,22 @@ int main(){
             break;
         }
 
+        //removing a node in a certain index
         case 9:{
             int index = 0;
             scanf("%d", &index);
+            getchar();
             StrList_removeAt(List, index);
             break;
         }
 
+        //reversing the list
         case 10:{
             StrList_reverse(List);
             break;
         }
 
+        //deleting all the nodes in the list
         case 11:{
             StrList_free(List);
             List = StrList_alloc(); // Reinitialize the list after freeing
@@ -164,11 +175,13 @@ int main(){
             break;
         }
 
+        //sorting the list
         case 12:{
             StrList_sort(List);
             break;
         }
 
+        //checking if the list is sorted
         case 13:{
             if(StrList_isSorted(List) != 0){
                 printf("true\n");
