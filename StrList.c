@@ -12,16 +12,25 @@ typedef struct _node {
  * StrList represents a StrList data structure.
  */
 struct _StrList{
-    Node* _head;
+    struct _node* _head;
     size_t _size;
 };
 typedef struct _StrList StrList;
 
 Node* Node_alloc(char* data, Node* next) {
-	Node* p= (Node*)malloc(sizeof(Node));
-	p->_data= data;
-	p->_next= next;
-	return p;
+	Node* p = (Node*)malloc(sizeof(Node));
+    if (p) {
+        p->_data = (char*)malloc(strlen(data) + 1);
+        if (p->_data) {
+            strcpy(p->_data, data);
+            p->_next = next;
+            return p;
+        } else {
+            free(p);
+            return NULL; // Handle memory allocation failure
+        }
+    }
+    return NULL; // Handle memory allocation failure
 }
 
 void Node_free(Node* node) {
@@ -54,6 +63,7 @@ void StrList_free(StrList* StrList){
 		Node_free(p2);
 	}
 	free(StrList);
+    StrList->_head = NULL;
 }
 
 /*
@@ -254,7 +264,7 @@ int StrList_isEqual(const StrList* StrList1, const StrList* StrList2){
         Node* temp1 = StrList1->_head;
         Node* temp2 = StrList2->_head;
         while(temp1 != NULL){
-            if(strcmp(temp1->_data, temp1->_data) != 0){
+            if(strcmp(temp1->_data, temp2->_data) != 0){
                 return 0;
             }
             temp1 = temp1->_next;
@@ -272,14 +282,29 @@ StrList* StrList_clone(const StrList* StrList){
     if(StrList == NULL){
         return NULL;
     }
-    StrList* copy = StrList_alloc();
+    struct _StrList* copy = StrList_alloc();
     if(copy == NULL){
-        return;
+        return NULL; // Handle allocation failure
     }
     copy->_size = 0;
     Node* temp = StrList->_head;
     while(temp != NULL){
-        StrList_insertLast(copy, temp->_data);
+        Node* n = Node_alloc(temp->_data, NULL);
+        if(n == NULL){
+            StrList_free(copy); // Free allocated memory if insertion fails
+            return NULL; // Handle allocation failure
+        }
+        // Insert the node at the end of the copy list
+        if(copy->_head == NULL){
+            copy->_head = n;
+        }
+        else {
+            Node* last = copy->_head;
+            while(last->_next != NULL){
+                last = last->_next;
+            }
+            last->_next = n;
+        }
         copy->_size++;
         temp = temp->_next;
     }
@@ -289,15 +314,80 @@ StrList* StrList_clone(const StrList* StrList){
 /*
  * Reverces the given StrList. 
  */
-void StrList_reverse( StrList* StrList);
+void StrList_reverse( StrList* StrList){
+    if(StrList == NULL){
+        return;
+    }
+    if(StrList->_head == NULL){
+        return;
+    }
+    Node* current = StrList->_head;
+    Node* prev = NULL;
+    Node* next = NULL;
+
+    while(current != NULL){
+        next = current->_next;
+        current->_next = prev;
+        prev = current;
+        current = next;
+    }
+    StrList->_head = prev;
+}
+
+//helper
+
+int compareStrings(const void* a, const void* b) {
+    const char* str1 = *(const char**)a;
+    const char* str2 = *(const char**)b;
+    return strcmp(str1, str2);
+}
 
 /*
  * Sort the given list in lexicographical order 
  */
-void StrList_sort( StrList* StrList);
+void StrList_sort( StrList* StrList){
+    if(StrList == NULL || StrList->_size < 2){
+        return;
+    }
+
+    char **arr = (char**)malloc(StrList->_size * sizeof(char*));
+    if (arr == NULL) {
+        // Handle memory allocation failure
+        return;
+    }
+
+    Node* temp = StrList->_head;
+    int i = 0;
+    while(temp != NULL && i < StrList->_size){
+        arr[i] = temp->_data;
+        temp = temp->_next;
+        i++;
+    }
+    qsort(arr, StrList->_size, sizeof(char*), compareStrings);
+    temp = StrList->_head;
+    i = 0;
+    while (temp != NULL && i < StrList->_size) {
+        free(temp->_data); // Free original memory
+        temp->_data = strdup(arr[i]); // Assign sorted string
+        temp = temp->_next;
+        i++;
+    }
+
+    // Free the array
+    free(arr);
+}
 
 /*
  * Checks if the given list is sorted in lexicographical order
  * returns 1 for sorted,   0 otherwise
  */
-int StrList_isSorted(StrList* StrList);
+int StrList_isSorted(StrList* StrList){
+    Node* temp = StrList->_head;
+    while(temp->_next != NULL){
+        if(strcmp(temp->_data, temp->_next->_data) > 0){
+            return 0;
+        }
+        temp = temp->_next;
+    }
+    return 1;
+}
