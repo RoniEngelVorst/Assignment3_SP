@@ -54,16 +54,29 @@ StrList* StrList_alloc(){
  * If StrList==NULL does nothing (same as free).
  */
 void StrList_free(StrList* StrList){
-    if (StrList == NULL) return;
-	Node* p1= StrList->_head;
-	Node* p2;
-	while(p1) {
-		p2= p1;
-		p1= p1->_next;
-		Node_free(p2);
-	}
-	free(StrList);
-    StrList->_head = NULL;
+    // if (StrList == NULL) return;
+	// Node* p1= StrList->_head;
+	// Node* p2;
+	// while(p1) {
+	// 	p2= p1;
+	// 	p1= p1->_next;
+	// 	Node_free(p2);
+	// }
+	// free(StrList);
+    // StrList->_head = NULL;
+    if (StrList == NULL || StrList->_head == NULL) return;
+
+    Node* p1 = StrList->_head;
+    Node* p2;
+
+    while(p1) {
+        p2 = p1;
+        p1 = p1->_next;
+        Node_free(p2);
+    }
+
+    StrList->_head = NULL; // Set the head pointer to NULL to indicate an empty list
+    StrList->_size = 0;
 }
 
 /*
@@ -77,6 +90,25 @@ size_t StrList_size(const StrList* StrList){
  * Inserts an element in the end of the StrList.
  */
 void StrList_insertLast(StrList* StrList, const char* data){
+    // if (StrList == NULL) {
+    //     return; // Check for NULL StrList
+    // }
+
+    // Node* n = Node_alloc(data, NULL);
+    // if (n == NULL) {
+    //     return; // Handle memory allocation failure
+    // }
+
+    // if (StrList->_head == NULL) {
+    //     StrList->_head = n;
+    // } else {
+    //     Node* temp = StrList->_head;
+    //     while (temp->_next != NULL) {
+    //         temp = temp->_next;
+    //     }
+    //     temp->_next = n;
+    // }
+    // StrList->_size++;
     if (StrList == NULL) {
         return; // Check for NULL StrList
     }
@@ -265,6 +297,9 @@ void StrList_removeAt(StrList* StrList, int index){
  * returns 0 if not and any other number if yes
  */
 int StrList_isEqual(const StrList* StrList1, const StrList* StrList2){
+    if(StrList1 == NULL && StrList2 == NULL){
+        return 1;
+    }
     if(StrList1->_size != StrList2->_size){
         return 0;
     }
